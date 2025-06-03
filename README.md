@@ -9,6 +9,7 @@ This update implements a complete redesign of the skip selection page, as reques
 - **Improved Layout:** Redesigned the card grid for better clarity and usability, ensuring information is easy to scan and select.
 - **Mobile Responsiveness:** Optimized the layout and interactions for mobile devices, providing a seamless experience across all screen sizes.
 - **Enhanced Feedback:** Improved selection indicators and warnings (e.g., "Not Allowed On The Road") for better user guidance.
+- **Search & Filter Features:** Added a comprehensive search bar and filtering system for easy skip discovery, allowing users to quickly find skips by size and filter by specific criteria such as road allowance and heavy waste compatibility.
 
 ## Summary
 The new design delivers a more attractive, intuitive, and responsive interface, aligning with modern web standards and the company's branding goals.
