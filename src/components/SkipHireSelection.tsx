@@ -3,6 +3,7 @@ import SkipSizeCard from './SkipSizeCard';
 import ProgressIndicator from './ProgressIndicator';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
+import SearchAndFilters from './SearchAndFilters';
 import { useSkipData } from '../hooks/useSkipData';
 import { calculateFinalPrice, formatHirePeriod } from '../utils/priceCalculations';
 import { Lightbulb, ArrowRight, XCircle, Ban, AlertTriangle } from 'lucide-react';
@@ -10,6 +11,9 @@ import { Lightbulb, ArrowRight, XCircle, Ban, AlertTriangle } from 'lucide-react
 const SkipHireSelection = () => {
   const [selectedSkipId, setSelectedSkipId] = useState<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterAllowedOnRoad, setFilterAllowedOnRoad] = useState(false);
+  const [filterAllowsHeavyWaste, setFilterAllowsHeavyWaste] = useState(false);
   
   const apiUrl = "https://app.wewantwaste.co.uk/api/skips/by-location?postcode=NR32&area=Lowestoft"; 
   const { skipData, loading, error } = useSkipData(apiUrl);
@@ -39,11 +43,11 @@ const SkipHireSelection = () => {
 
   // Fallback data for when API URL is not provided
   const fallbackData = [
-    { id: 1, size: 4, hire_period_days: 14, price_before_vat: 211, vat: 20, allowed_on_road: true },
-    { id: 2, size: 6, hire_period_days: 14, price_before_vat: 264, vat: 20, allowed_on_road: true },
-    { id: 3, size: 8, hire_period_days: 14, price_before_vat: 295, vat: 20, allowed_on_road: true },
-    { id: 4, size: 10, hire_period_days: 14, price_before_vat: 336, vat: 20, allowed_on_road: false },
-    { id: 5, size: 12, hire_period_days: 14, price_before_vat: 390, vat: 20, allowed_on_road: false },
+    { id: 1, size: 4, hire_period_days: 14, price_before_vat: 211, vat: 20, allowed_on_road: true, allows_heavy_waste: true },
+    { id: 2, size: 6, hire_period_days: 14, price_before_vat: 264, vat: 20, allowed_on_road: true, allows_heavy_waste: true },
+    { id: 3, size: 8, hire_period_days: 14, price_before_vat: 295, vat: 20, allowed_on_road: true, allows_heavy_waste: true },
+    { id: 4, size: 10, hire_period_days: 14, price_before_vat: 336, vat: 20, allowed_on_road: false, allows_heavy_waste: false },
+    { id: 5, size: 12, hire_period_days: 14, price_before_vat: 390, vat: 20, allowed_on_road: false, allows_heavy_waste: false },
   ].map(item => ({
     ...item,
     transport_cost: null,
@@ -53,10 +57,17 @@ const SkipHireSelection = () => {
     forbidden: false,
     created_at: "",
     updated_at: "",
-    allows_heavy_waste: true,
   }));
 
   const displayData = skipData.length > 0 ? skipData : fallbackData;
+
+  // Filter skips based on search term and filters
+  const filteredSkips = displayData.filter(skip => {
+    const matchesSearch = skip.size.toString().includes(searchTerm);
+    const matchesAllowedOnRoad = !filterAllowedOnRoad || skip.allowed_on_road;
+    const matchesAllowsHeavyWaste = !filterAllowsHeavyWaste || skip.allows_heavy_waste;
+    return matchesSearch && matchesAllowedOnRoad && matchesAllowsHeavyWaste;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
@@ -74,6 +85,16 @@ const SkipHireSelection = () => {
           </p>
         </div>
 
+        {/* Search and Filters */}
+        <SearchAndFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          filterAllowedOnRoad={filterAllowedOnRoad}
+          onAllowedOnRoadChange={setFilterAllowedOnRoad}
+          filterAllowsHeavyWaste={filterAllowsHeavyWaste}
+          onAllowsHeavyWasteChange={setFilterAllowsHeavyWaste}
+        />
+
         {/* Content */}
         {loading && <LoadingSpinner />}
         
@@ -88,7 +109,7 @@ const SkipHireSelection = () => {
           <>
             {/* Skip Options Grid - 2 columns on mobile, responsive grid on larger screens */}
             <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-3 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-              {displayData.map((skip) => (
+              {filteredSkips.map((skip) => (
                 <div key={skip.id} className="animate-fade-in">
                   <SkipSizeCard
                     skip={skip}
